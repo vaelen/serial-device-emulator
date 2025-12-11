@@ -51,10 +51,13 @@ radio-emulator/
         │   ├── YaesuDevice.h/.cpp
         │   ├── YaesuState.h
         │   └── CATParser.h/.cpp
-        └── g5500/          # G-5500 rotator (category: rotator)
-            ├── G5500Device.h/.cpp
-            ├── G5500State.h
-            └── GS232Parser.h/.cpp
+        ├── g5500/          # G-5500 rotator (category: rotator)
+        │   ├── G5500Device.h/.cpp
+        │   ├── G5500State.h
+        │   └── GS232Parser.h/.cpp
+        └── nmea_gps/       # NMEA GPS (category: gps)
+            ├── NMEAGPSDevice.h/.cpp
+            └── NMEAGenerator.h/.cpp
 ```
 
 ## Architecture
@@ -141,7 +144,7 @@ Default device types are configured in `platform_config.h`:
 ```cpp
 #define DEFAULT_RADIO_TYPE "ft-991a"
 #define DEFAULT_ROTATOR_TYPE "g-5500"
-#define DEFAULT_GPS_TYPE ""
+#define DEFAULT_GPS_TYPE "nmea-gps"
 ```
 
 ## Yaesu FT-991A CAT Protocol Notes
@@ -178,6 +181,12 @@ Default device types are configured in `platform_config.h`:
 1. Add handler declaration in `Console.h`
 2. Implement handler in `Console.cpp`
 3. Add entry to `commands[]` array in `Console.cpp`
+
+### Console commands reference
+
+Key commands: `help`, `types`, `uarts`, `devices`, `create`, `destroy`, `start`, `stop`, `status`, `options`, `set`, `get`, `log`, `smeter`, `power`, `swr`, `gps`, `save`, `clear`
+
+The `uarts` command displays available UARTs with their pin assignments and allocation status.
 
 ### Adding a new device option
 

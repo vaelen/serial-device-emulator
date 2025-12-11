@@ -3,6 +3,7 @@
 
 #include "Console.h"
 #include "ConfigStorage.h"
+#include "devices/nmea_gps/NMEAGPSDevice.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -11,6 +12,7 @@
 static const ConsoleCommand commands[] = {
     {"help",    "help [command]",           "Show help for commands",               cmdHelp},
     {"types",   "types",                    "List available device types",          cmdTypes},
+    {"uarts",   "uarts",                    "List available UARTs with pins",       cmdUarts},
     {"devices", "devices",                  "List active device instances",         cmdDevices},
     {"create",  "create <type> <uart>",     "Create device on UART (e.g., create radio 1)", cmdCreate},
     {"destroy", "destroy <id>",             "Destroy device by ID",                 cmdDestroy},
@@ -26,6 +28,7 @@ static const ConsoleCommand commands[] = {
     {"swr",     "swr <id> <value>",         "Set SWR meter value",                  cmdSwr},
     {"save",    "save",                     "Save configuration to EEPROM",         cmdSave},
     {"clear",   "clear",                    "Clear stored configuration",           cmdClear},
+    {"gps",     "gps <id> <lat> <lon> [alt]", "Set GPS position (decimal degrees)",  cmdGps},
     {nullptr, nullptr, nullptr, nullptr}
 };
 
@@ -158,6 +161,15 @@ void Console::showWelcome() {
     println("  Radio Emulator Console");
     printf("  Platform: %s\n", PLATFORM_NAME);
     printf("  Available UARTs: %d\n", PLATFORM_MAX_UARTS);
+    print("  UARTs: ");
+    for (uint8_t i = 1; i <= PLATFORM_MAX_UARTS; i++) {
+        const char* pins = getUartPins(i);
+        if (pins != nullptr) {
+            if (i > 1) print(", ");
+            printf("%d(%s)", i, pins);
+        }
+    }
+    println();
     println("=================================");
     println("Type 'help' for available commands.");
     println();
@@ -251,6 +263,8 @@ void cmdTypes(Console& console, int argc, char* argv[]) {
 }
 
 void cmdDevices(Console& console, int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
     DeviceManager& mgr = console.getDeviceManager();
     size_t count = mgr.getDeviceCount();
 
@@ -260,16 +274,18 @@ void cmdDevices(Console& console, int argc, char* argv[]) {
     }
 
     console.println("Active devices:");
-    console.println("  ID  Type        UART  Status");
-    console.println("  --  ----------  ----  ------");
+    console.println("  ID  Type        UART  Pins              Status");
+    console.println("  --  ----------  ----  ----------------  ------");
 
     for (uint8_t i = 0; i < MAX_DEVICES; i++) {
         IEmulatedDevice* dev = mgr.getDevice(i);
         if (dev != nullptr) {
-            console.printf("  %2d  %-10s  %4d  %s\n",
+            const char* pins = getUartPins(dev->getUartIndex());
+            console.printf("  %2d  %-10s  %4d  %-16s  %s\n",
                           dev->getDeviceId(),
                           dev->getName(),
                           dev->getUartIndex(),
+                          pins != nullptr ? pins : "N/A",
                           dev->isRunning() ? "running" : "stopped");
         }
     }
@@ -381,9 +397,10 @@ void cmdStatus(Console& console, int argc, char* argv[]) {
     char statusBuf[256];
     dev->getStatus(statusBuf, sizeof(statusBuf));
 
+    const char* pins = getUartPins(dev->getUartIndex());
     console.printf("Device %d (%s):\n", id, dev->getName());
     console.printf("  Description: %s\n", dev->getDescription());
-    console.printf("  UART: %d\n", dev->getUartIndex());
+    console.printf("  UART: %d (%s)\n", dev->getUartIndex(), pins != nullptr ? pins : "N/A");
     console.printf("  Status: %s\n", dev->isRunning() ? "running" : "stopped");
     console.println(statusBuf);
 }
@@ -559,4 +576,82 @@ void cmdClear(Console& console, int argc, char* argv[]) {
 
     ConfigStorage::clear();
     console.println("Configuration cleared from EEPROM.");
+}
+
+void cmdGps(Console& console, int argc, char* argv[]) {
+    if (argc < 4) {
+        console.println("Usage: gps <id> <lat> <lon> [alt]");
+        console.println("  lat/lon in decimal degrees (e.g., 37.7749 -122.4194)");
+        return;
+    }
+
+    int id = atoi(argv[1]);
+    IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
+    if (dev == nullptr) {
+        console.printf("Device %d not found\n", id);
+        return;
+    }
+
+    // Check if this is a GPS device
+    if (strcmp(dev->getName(), "nmea-gps") != 0) {
+        console.printf("Device %d is not a GPS device\n", id);
+        return;
+    }
+
+    double lat = atof(argv[2]);
+    double lon = atof(argv[3]);
+    float alt = 0.0f;
+    if (argc > 4) {
+        alt = atof(argv[4]);
+    }
+
+    // Validate latitude/longitude ranges
+    if (lat < -90.0 || lat > 90.0) {
+        console.println("Invalid latitude (must be -90 to 90)");
+        return;
+    }
+    if (lon < -180.0 || lon > 180.0) {
+        console.println("Invalid longitude (must be -180 to 180)");
+        return;
+    }
+
+    NMEAGPSDevice* gps = static_cast<NMEAGPSDevice*>(dev);
+    gps->setPosition(lat, lon, alt);
+    console.printf("GPS position set to %.6f, %.6f", lat, lon);
+    if (argc > 4) {
+        console.printf(", %.1fm", alt);
+    }
+    console.println();
+}
+
+void cmdUarts(Console& console, int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+
+    console.printf("Available UARTs on %s:\n", PLATFORM_NAME);
+    console.println("  UART  Pins              Status");
+    console.println("  ----  ----------------  ----------");
+
+    DeviceManager& mgr = console.getDeviceManager();
+
+    for (uint8_t i = 1; i <= PLATFORM_MAX_UARTS; i++) {
+        const char* pins = getUartPins(i);
+        if (pins == nullptr) {
+            continue;  // Skip UARTs without pin info
+        }
+
+        // Check if UART is available or in use
+        const char* status = "available";
+        for (uint8_t d = 0; d < MAX_DEVICES; d++) {
+            IEmulatedDevice* dev = mgr.getDevice(d);
+            if (dev != nullptr && dev->getUartIndex() == i) {
+                static char statusBuf[24];
+                snprintf(statusBuf, sizeof(statusBuf), "in use (dev %d)", dev->getDeviceId());
+                status = statusBuf;
+                break;
+            }
+        }
+
+        console.printf("  %4d  %-16s  %s\n", i, pins, status);
+    }
 }

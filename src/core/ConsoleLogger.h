@@ -13,7 +13,6 @@ public:
     explicit ConsoleLogger(Stream& output);
     ~ConsoleLogger() override = default;
 
-    void log(LogLevel level, const char* tag, const char* message) override;
     void logf(LogLevel level, const char* tag, const char* fmt, ...) override;
 
     LogLevel getLevel() const override { return _minLevel; }

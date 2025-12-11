@@ -12,8 +12,9 @@
 ILogger* ConfigStorage::_logger = nullptr;
 
 void ConfigStorage::begin() {
-#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO)
-    // Pico requires size parameter
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO) || \
+    defined(ARDUINO_ARCH_ESP32)
+    // Pico and ESP platforms require size parameter
     EEPROM.begin(EEPROM_SIZE);
 #else
     // STM32 and other platforms
@@ -54,8 +55,9 @@ bool ConfigStorage::readConfig(StoredConfig& config) {
 bool ConfigStorage::writeConfig(const StoredConfig& config) {
     EEPROM.put(0, config);
 
-#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO)
-    // Pico requires explicit commit
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO) || \
+    defined(ARDUINO_ARCH_ESP32)
+    // Pico and ESP platforms require explicit commit
     EEPROM.commit();
 #endif
 
@@ -67,7 +69,7 @@ uint8_t ConfigStorage::load(DeviceManager& mgr) {
 
     if (!readConfig(config)) {
         if (_logger) {
-            _logger->log(LogLevel::INFO, "Config", "No valid configuration found");
+            _logger->logf(LogLevel::INFO, "Config", "No valid configuration found");
         }
         return 0;
     }
@@ -118,7 +120,7 @@ bool ConfigStorage::save(DeviceManager& mgr) {
 
     if (!writeConfig(config)) {
         if (_logger) {
-            _logger->log(LogLevel::ERROR, "Config", "Failed to write configuration");
+            _logger->logf(LogLevel::ERROR, "Config", "Failed to write configuration");
         }
         return false;
     }
@@ -138,12 +140,13 @@ void ConfigStorage::clear() {
     // Write zeroed config (invalid magic)
     EEPROM.put(0, config);
 
-#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO)
+#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO) || \
+    defined(ARDUINO_ARCH_ESP32)
     EEPROM.commit();
 #endif
 
     if (_logger) {
-        _logger->log(LogLevel::INFO, "Config", "Configuration cleared");
+        _logger->logf(LogLevel::INFO, "Config", "Configuration cleared");
     }
 }
 
@@ -175,7 +178,7 @@ bool ConfigStorage::restoreDevice(const StoredDeviceConfig& config, DeviceManage
     // Validate type name
     if (config.typeName[0] == '\0') {
         if (_logger) {
-            _logger->log(LogLevel::WARN, "Config", "Empty device type name");
+            _logger->logf(LogLevel::WARN, "Config", "Empty device type name");
         }
         return false;
     }

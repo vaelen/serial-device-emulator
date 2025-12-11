@@ -9,7 +9,7 @@ HardwareSerialPort::HardwareSerialPort(HardwareSerial& serial)
 {
 }
 
-void HardwareSerialPort::begin(uint32_t baud, uint16_t config) {
+void HardwareSerialPort::begin(uint32_t baud, uint32_t config) {
     _serial.begin(baud, config);
     _isOpen = true;
 }

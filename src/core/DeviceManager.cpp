@@ -130,7 +130,7 @@ uint8_t DeviceManager::createDevice(const char* typeName, uint8_t uartIndex) {
     uint8_t slot = findFreeDeviceSlot();
     if (slot == INVALID_ID) {
         if (_logger) {
-            _logger->log(LogLevel::ERROR, "DevMgr", "No free device slots");
+            _logger->logf(LogLevel::ERROR, "DevMgr", "No free device slots");
         }
         return INVALID_ID;
     }
@@ -148,7 +148,7 @@ uint8_t DeviceManager::createDevice(const char* typeName, uint8_t uartIndex) {
     IEmulatedDevice* device = factory->create(serial, uartIndex);
     if (device == nullptr) {
         if (_logger) {
-            _logger->log(LogLevel::ERROR, "DevMgr", "Factory failed to create device");
+            _logger->logf(LogLevel::ERROR, "DevMgr", "Factory failed to create device");
         }
         return INVALID_ID;
     }
@@ -267,6 +267,24 @@ bool DeviceManager::isUartAvailable(uint8_t uartIndex) const {
 #if !HAS_SERIAL2
     if (uartIndex == 2) return false;
 #endif
+#if !HAS_SERIAL3
+    if (uartIndex == 3) return false;
+#endif
+#if !HAS_SERIAL4
+    if (uartIndex == 4) return false;
+#endif
+#if !HAS_SERIAL5
+    if (uartIndex == 5) return false;
+#endif
+#if !HAS_SERIAL6
+    if (uartIndex == 6) return false;
+#endif
+#if !HAS_SERIAL7
+    if (uartIndex == 7) return false;
+#endif
+#if !HAS_SERIAL8
+    if (uartIndex == 8) return false;
+#endif
 
     // Check if already allocated
     return _uartAllocation[uartIndex - 1] == INVALID_ID;
@@ -294,6 +312,36 @@ ISerialPort* DeviceManager::getSerialForUart(uint8_t uartIndex) {
 #if HAS_SERIAL2
         case 2:
             hwSerial = &Serial2;
+            break;
+#endif
+#if HAS_SERIAL3
+        case 3:
+            hwSerial = &Serial3;
+            break;
+#endif
+#if HAS_SERIAL4
+        case 4:
+            hwSerial = &Serial4;
+            break;
+#endif
+#if HAS_SERIAL5
+        case 5:
+            hwSerial = &Serial5;
+            break;
+#endif
+#if HAS_SERIAL6
+        case 6:
+            hwSerial = &Serial6;
+            break;
+#endif
+#if HAS_SERIAL7
+        case 7:
+            hwSerial = &Serial7;
+            break;
+#endif
+#if HAS_SERIAL8
+        case 8:
+            hwSerial = &Serial8;
             break;
 #endif
         default:

@@ -40,7 +40,7 @@ enum class MeterType : uint8_t {
     POWER,          // TX power
     SWR,            // Standing wave ratio
     ALC,            // Automatic level control
-    COMP            // Compression meter
+    COMPRESSION     // Compression meter (renamed from COMP to avoid STM32 header conflict)
 };
 
 // Abstract interface for emulated radio devices

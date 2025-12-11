@@ -12,7 +12,7 @@ public:
     virtual ~ISerialPort() = default;
 
     // Initialize the serial port with specified baud rate and configuration
-    virtual void begin(uint32_t baud, uint16_t config = SERIAL_8N1) = 0;
+    virtual void begin(uint32_t baud, uint32_t config = SERIAL_8N1) = 0;
 
     // Shutdown the serial port
     virtual void end() = 0;

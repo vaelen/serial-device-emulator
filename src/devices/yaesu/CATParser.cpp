@@ -48,7 +48,7 @@ bool CATParser::update() {
         } else {
             // Buffer overflow, reset
             if (_logger) {
-                _logger->log(LogLevel::WARN, "CAT", "Buffer overflow, resetting");
+                _logger->logf(LogLevel::WARN, "CAT", "Buffer overflow, resetting");
             }
             _bufLen = 0;
         }

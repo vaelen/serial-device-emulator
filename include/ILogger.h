@@ -37,9 +37,6 @@ class ILogger {
 public:
     virtual ~ILogger() = default;
 
-    // Log a message with the specified level and tag
-    virtual void log(LogLevel level, const char* tag, const char* message) = 0;
-
     // Log a formatted message (printf-style)
     virtual void logf(LogLevel level, const char* tag, const char* fmt, ...) = 0;
 

@@ -53,7 +53,7 @@ bool YaesuDevice::begin() {
 
     if (_serial == nullptr) {
         if (_logger) {
-            _logger->log(LogLevel::ERROR, "Yaesu", "No serial port configured");
+            _logger->logf(LogLevel::ERROR, "Yaesu", "No serial port configured");
         }
         return false;
     }
@@ -163,7 +163,7 @@ bool YaesuDevice::setMeter(MeterType type, uint8_t value) {
         case MeterType::ALC:
             _state.alcMeter = value;
             break;
-        case MeterType::COMP:
+        case MeterType::COMPRESSION:
             _state.compMeter = value;
             break;
         default:
@@ -183,7 +183,7 @@ uint8_t YaesuDevice::getMeter(MeterType type) const {
         case MeterType::POWER:  return _state.powerMeter;
         case MeterType::SWR:    return _state.swrMeter;
         case MeterType::ALC:    return _state.alcMeter;
-        case MeterType::COMP:   return _state.compMeter;
+        case MeterType::COMPRESSION:   return _state.compMeter;
         default: return 0;
     }
 }

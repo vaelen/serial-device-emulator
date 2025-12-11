@@ -18,15 +18,6 @@ void ConsoleLogger::printPrefix(LogLevel level, const char* tag) {
     _output.print("] ");
 }
 
-void ConsoleLogger::log(LogLevel level, const char* tag, const char* message) {
-    if (level < _minLevel) {
-        return;
-    }
-
-    printPrefix(level, tag);
-    _output.println(message);
-}
-
 void ConsoleLogger::logf(LogLevel level, const char* tag, const char* fmt, ...) {
     if (level < _minLevel) {
         return;

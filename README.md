@@ -15,6 +15,9 @@ A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiv
 ### Rotator
 - **Yaesu G-5500** (`g-5500`) - Az/El rotator with GS-232 protocol, realistic rotation simulation
 
+### GPS
+- **NMEA GPS** (`nmea-gps`) - Standard NMEA 0183 GPS emulator with configurable output rate
+
 ## Architecture
 
 ```
@@ -90,6 +93,7 @@ You can use category aliases (`radio`, `rotator`, `gps`) or specific device name
 |---------|-------------|
 | `help [cmd]` | Show help for all or specific command |
 | `types` | List available device types |
+| `uarts` | List available UARTs with pin assignments |
 | `devices` | List active device instances |
 | `create <type> <uart>` | Create device on specified UART |
 | `destroy <id>` | Destroy device by ID |
@@ -103,6 +107,7 @@ You can use category aliases (`radio`, `rotator`, `gps`) or specific device name
 | `smeter <id> <val>` | Set S-meter value (0-255) |
 | `power <id> <val>` | Set power meter value |
 | `swr <id> <val>` | Set SWR meter value |
+| `gps <id> <lat> <lon> [alt]` | Set GPS position (decimal degrees) |
 | `save` | Save configuration to EEPROM |
 | `clear` | Clear stored configuration |
 
@@ -113,6 +118,7 @@ You can use category aliases (`radio`, `rotator`, `gps`) or specific device name
   Radio Emulator Console
   Platform: Nucleo-L432KC
   Available UARTs: 1
+  UARTs: 1(TX=PA9, RX=PA10)
 =================================
 Type 'help' for available commands.
 
@@ -126,7 +132,7 @@ Available device types:
     g-5500       - Yaesu G-5500 Rotator (GS-232)
 
   GPS:
-    (none)
+    nmea-gps     - NMEA GPS Emulator
 
 > create radio 1
 [INF] [DevMgr] Created device 0 (ft-991a) on UART 1
@@ -147,7 +153,7 @@ Started device 0
 > status 0
 Device 0 (ft-991a):
   Description: Yaesu FT-991A CAT Emulator
-  UART: 1
+  UART: 1 (TX=PA9, RX=PA10)
   Status: running
   VFO-A: 14074000 Hz (USB)
   VFO-B: 7074000 Hz
@@ -258,6 +264,48 @@ The emulator simulates realistic rotation:
 | az_speed | 1-10 | 2 | Azimuth rotation speed (deg/sec) |
 | el_speed | 1-10 | 1 | Elevation rotation speed (deg/sec) |
 
+## NMEA GPS Emulator
+
+The GPS emulator outputs standard NMEA 0183 sentences continuously at a configurable rate.
+
+### Output Sentences
+
+The emulator outputs the following NMEA sentences each update cycle:
+
+| Sentence | Description |
+|----------|-------------|
+| GGA | GPS Fix Data (position, altitude, satellites, HDOP) |
+| RMC | Recommended Minimum (position, speed, course, date/time) |
+| GSA | DOP and Active Satellites |
+| GSV | Satellites in View (PRN, elevation, azimuth, SNR) |
+| VTG | Velocity Made Good (course and speed) |
+
+### Simulated Data
+
+- **Position**: Default San Francisco (37.7749, -122.4194), configurable via `gps` command
+- **Time**: Simulated UTC time, advances each second
+- **Satellites**: 8 simulated satellites with realistic PRN, elevation, azimuth, and SNR values
+- **Fix**: Reports valid GPS fix with 1.0 HDOP by default
+
+### NMEA GPS Device Options
+
+| Option | Values | Default | Description |
+|--------|--------|---------|-------------|
+| baud_rate | 4800, 9600, 19200, 38400 | 9600 | Serial baud rate |
+| update_rate | 1, 5, 10 | 1 | Output rate in Hz |
+
+### Setting GPS Position
+
+Use the `gps` command to set the emulated position:
+
+```
+> gps 0 40.7128 -74.0060        # New York (lat, lon)
+GPS position set to 40.712800, -74.006000
+
+> gps 0 51.5074 -0.1278 15.5    # London with altitude
+GPS position set to 51.507400, -0.127800, 15.5m
+```
+
 ## Hardware Connections
 
 ### STM32 Nucleo L432KC
@@ -275,8 +323,8 @@ The emulator simulates realistic rotation:
 |----------|-----|
 | Console TX | USB |
 | Console RX | USB |
-| Device 1 TX | GP0 |
-| Device 1 RX | GP1 |
+| Device 1 TX | GP4 |
+| Device 1 RX | GP5 |
 
 ## Adding New Device Types
 
@@ -289,12 +337,13 @@ To add support for a new device:
 5. Create a factory class implementing `IDeviceFactory` (with `getCategory()`)
 6. Register the factory in `main.cpp`
 
-See `src/devices/yaesu/` (radio) or `src/devices/g5500/` (rotator) for examples.
+See `src/devices/yaesu/` (radio), `src/devices/g5500/` (rotator), or `src/devices/nmea_gps/` (GPS) for examples.
 
 ## References
 
 - [Yaesu FT-991A CAT Manual (Official)](https://www.yaesu.com/Files/4CB893D7-1018-01AF-FA97E9E9AD48B50C/FT-991A_CAT_OM_ENG_1711-D.pdf)
 - [Hamlib newcat.c](https://github.com/Derecho/hamlib/blob/master/yaesu/newcat.c) - Reference implementation
+- [NMEA 0183 Standard](https://gpsd.gitlab.io/gpsd/NMEA.html) - GPS sentence format reference
 
 ## License
 

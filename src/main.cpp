@@ -10,6 +10,7 @@
 #include "console/Console.h"
 #include "devices/yaesu/YaesuDevice.h"
 #include "devices/g5500/G5500Device.h"
+#include "devices/nmea_gps/NMEAGPSDevice.h"
 
 // Global instances
 static DeviceManager deviceManager;
@@ -19,6 +20,7 @@ static Console* console = nullptr;
 // Device factories
 static YaesuDeviceFactory yaesuFactory;
 static G5500DeviceFactory g5500Factory;
+static NMEAGPSDeviceFactory nmeaGpsFactory;
 
 void setup() {
     // Initialize console serial port
@@ -38,6 +40,7 @@ void setup() {
     // Register device factories
     deviceManager.registerFactory(&yaesuFactory);
     deviceManager.registerFactory(&g5500Factory);
+    deviceManager.registerFactory(&nmeaGpsFactory);
 
     // Initialize configuration storage
     ConfigStorage::begin();

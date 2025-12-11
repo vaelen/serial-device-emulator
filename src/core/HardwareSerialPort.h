@@ -11,7 +11,7 @@ public:
     explicit HardwareSerialPort(HardwareSerial& serial);
     ~HardwareSerialPort() override = default;
 
-    void begin(uint32_t baud, uint16_t config = SERIAL_8N1) override;
+    void begin(uint32_t baud, uint32_t config = SERIAL_8N1) override;
     void end() override;
     int available() override;
     int read() override;

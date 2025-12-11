@@ -31,9 +31,9 @@ bool GS232Parser::update() {
         if (_echo && _logger) {
             char echoStr[2] = {c, '\0'};
             if (c == GS232_CR) {
-                _logger->log(LogLevel::DEBUG, "G5500", "<CR>");
+                _logger->logf(LogLevel::DEBUG, "G5500", "<CR>");
             } else if (c == GS232_LF) {
-                _logger->log(LogLevel::DEBUG, "G5500", "<LF>");
+                _logger->logf(LogLevel::DEBUG, "G5500", "<LF>");
             } else if (c >= 32 && c < 127) {
                 _logger->logf(LogLevel::DEBUG, "G5500", "RX: %s", echoStr);
             }
@@ -125,7 +125,7 @@ void GS232Parser::sendResponse(const char* response) {
 void GS232Parser::handleR() {
     _state.rotateCW();
     if (_logger) {
-        _logger->log(LogLevel::DEBUG, "G5500", "Rotating CW");
+        _logger->logf(LogLevel::DEBUG, "G5500", "Rotating CW");
     }
 }
 
@@ -133,7 +133,7 @@ void GS232Parser::handleR() {
 void GS232Parser::handleL() {
     _state.rotateCCW();
     if (_logger) {
-        _logger->log(LogLevel::DEBUG, "G5500", "Rotating CCW");
+        _logger->logf(LogLevel::DEBUG, "G5500", "Rotating CCW");
     }
 }
 
@@ -141,7 +141,7 @@ void GS232Parser::handleL() {
 void GS232Parser::handleA() {
     _state.stopAzimuth();
     if (_logger) {
-        _logger->log(LogLevel::DEBUG, "G5500", "Azimuth stopped");
+        _logger->logf(LogLevel::DEBUG, "G5500", "Azimuth stopped");
     }
 }
 
@@ -149,7 +149,7 @@ void GS232Parser::handleA() {
 void GS232Parser::handleU() {
     _state.rotateUp();
     if (_logger) {
-        _logger->log(LogLevel::DEBUG, "G5500", "Rotating up");
+        _logger->logf(LogLevel::DEBUG, "G5500", "Rotating up");
     }
 }
 
@@ -157,7 +157,7 @@ void GS232Parser::handleU() {
 void GS232Parser::handleD() {
     _state.rotateDown();
     if (_logger) {
-        _logger->log(LogLevel::DEBUG, "G5500", "Rotating down");
+        _logger->logf(LogLevel::DEBUG, "G5500", "Rotating down");
     }
 }
 
@@ -165,7 +165,7 @@ void GS232Parser::handleD() {
 void GS232Parser::handleE() {
     _state.stopElevation();
     if (_logger) {
-        _logger->log(LogLevel::DEBUG, "G5500", "Elevation stopped");
+        _logger->logf(LogLevel::DEBUG, "G5500", "Elevation stopped");
     }
 }
 
@@ -173,7 +173,7 @@ void GS232Parser::handleE() {
 void GS232Parser::handleS() {
     _state.stopAll();
     if (_logger) {
-        _logger->log(LogLevel::DEBUG, "G5500", "All rotation stopped");
+        _logger->logf(LogLevel::DEBUG, "G5500", "All rotation stopped");
     }
 }
 

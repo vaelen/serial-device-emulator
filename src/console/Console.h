@@ -90,3 +90,5 @@ void cmdPower(Console& console, int argc, char* argv[]);
 void cmdSwr(Console& console, int argc, char* argv[]);
 void cmdSave(Console& console, int argc, char* argv[]);
 void cmdClear(Console& console, int argc, char* argv[]);
+void cmdGps(Console& console, int argc, char* argv[]);
+void cmdUarts(Console& console, int argc, char* argv[]);
