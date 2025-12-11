@@ -73,7 +73,34 @@ IDeviceFactory* DeviceManager::findFactory(const char* typeName) {
     return nullptr;
 }
 
+const char* DeviceManager::resolveTypeName(const char* typeOrCategory) {
+    if (typeOrCategory == nullptr) {
+        return typeOrCategory;
+    }
+
+    // Check if input is a category name and map to default type
+    if (strcasecmp(typeOrCategory, "radio") == 0) {
+        if (strlen(DEFAULT_RADIO_TYPE) > 0) {
+            return DEFAULT_RADIO_TYPE;
+        }
+    } else if (strcasecmp(typeOrCategory, "rotator") == 0) {
+        if (strlen(DEFAULT_ROTATOR_TYPE) > 0) {
+            return DEFAULT_ROTATOR_TYPE;
+        }
+    } else if (strcasecmp(typeOrCategory, "gps") == 0) {
+        if (strlen(DEFAULT_GPS_TYPE) > 0) {
+            return DEFAULT_GPS_TYPE;
+        }
+    }
+
+    // Return unchanged if not a category or no default defined
+    return typeOrCategory;
+}
+
 uint8_t DeviceManager::createDevice(const char* typeName, uint8_t uartIndex) {
+    // Resolve category aliases to actual type names
+    const char* resolvedType = resolveTypeName(typeName);
+
     // Validate UART index
     if (uartIndex == 0 || uartIndex > PLATFORM_MAX_UARTS) {
         if (_logger) {
@@ -91,7 +118,7 @@ uint8_t DeviceManager::createDevice(const char* typeName, uint8_t uartIndex) {
     }
 
     // Find factory
-    IDeviceFactory* factory = findFactory(typeName);
+    IDeviceFactory* factory = findFactory(resolvedType);
     if (factory == nullptr) {
         if (_logger) {
             _logger->logf(LogLevel::ERROR, "DevMgr", "Unknown device type: %s", typeName);
@@ -138,7 +165,7 @@ uint8_t DeviceManager::createDevice(const char* typeName, uint8_t uartIndex) {
 
     if (_logger) {
         _logger->logf(LogLevel::INFO, "DevMgr", "Created device %d (%s) on UART %d",
-                      deviceId, typeName, uartIndex);
+                      deviceId, resolvedType, uartIndex);
     }
 
     return deviceId;

@@ -7,6 +7,33 @@
 #include "ILogger.h"
 #include "DeviceOption.h"
 
+// Device categories for grouping and default aliases
+enum class DeviceCategory : uint8_t {
+    RADIO = 0,
+    ROTATOR,
+    GPS
+};
+
+// Convert category enum to string
+inline const char* categoryToString(DeviceCategory cat) {
+    switch (cat) {
+        case DeviceCategory::RADIO: return "radio";
+        case DeviceCategory::ROTATOR: return "rotator";
+        case DeviceCategory::GPS: return "gps";
+        default: return "unknown";
+    }
+}
+
+// Convert category enum to display name
+inline const char* categoryDisplayName(DeviceCategory cat) {
+    switch (cat) {
+        case DeviceCategory::RADIO: return "Radio";
+        case DeviceCategory::ROTATOR: return "Rotator";
+        case DeviceCategory::GPS: return "GPS";
+        default: return "Unknown";
+    }
+}
+
 // Meter types for console-controlled simulation values
 enum class MeterType : uint8_t {
     SMETER = 0,     // S-meter (signal strength)
@@ -105,11 +132,14 @@ class IDeviceFactory {
 public:
     virtual ~IDeviceFactory() = default;
 
-    // Get device type name (e.g., "yaesu")
+    // Get device type name (e.g., "ft-991a")
     virtual const char* getTypeName() const = 0;
 
     // Get human-readable description
     virtual const char* getDescription() const = 0;
+
+    // Get device category (radio, rotator, gps)
+    virtual DeviceCategory getCategory() const = 0;
 
     // Create a new device instance
     // serial: The serial port for this device to use

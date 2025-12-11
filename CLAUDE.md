@@ -47,10 +47,14 @@ radio-emulator/
     │   ├── ConsoleLogger.h/.cpp
     │   └── ConfigStorage.cpp
     └── devices/            # Device implementations
-        └── yaesu/
-            ├── YaesuDevice.h/.cpp
-            ├── YaesuState.h
-            └── CATParser.h/.cpp
+        ├── yaesu/          # FT-991A radio (category: radio)
+        │   ├── YaesuDevice.h/.cpp
+        │   ├── YaesuState.h
+        │   └── CATParser.h/.cpp
+        └── g5500/          # G-5500 rotator (category: rotator)
+            ├── G5500Device.h/.cpp
+            ├── G5500State.h
+            └── GS232Parser.h/.cpp
 ```
 
 ## Architecture
@@ -121,6 +125,7 @@ The framework uses a modular architecture with clear separation of concerns:
 4. Implement `IEmulatedDevice` (e.g., `<Name>Device.h/.cpp`)
    - Must implement `serializeOptions()` and `deserializeOptions()` for EEPROM persistence
 5. Implement `IDeviceFactory` in the device file
+   - Must implement `getCategory()` returning `DeviceCategory::RADIO`, `ROTATOR`, or `GPS`
 6. Register factory in `main.cpp`:
    ```cpp
    static <Name>DeviceFactory <name>Factory;
@@ -128,7 +133,18 @@ The framework uses a modular architecture with clear separation of concerns:
    deviceManager.registerFactory(&<name>Factory);
    ```
 
-## Yaesu CAT Protocol Notes
+### Device Categories
+
+Devices are grouped by category (`radio`, `rotator`, `gps`). The `types` console command shows devices grouped by category. Users can create devices using either the device type name (e.g., `ft-991a`) or the category name (e.g., `radio`) which uses the default device for that category.
+
+Default device types are configured in `platform_config.h`:
+```cpp
+#define DEFAULT_RADIO_TYPE "ft-991a"
+#define DEFAULT_ROTATOR_TYPE "g-5500"
+#define DEFAULT_GPS_TYPE ""
+```
+
+## Yaesu FT-991A CAT Protocol Notes
 
 - Commands are 2 uppercase letters + parameters + `;` terminator
 - Read commands: `XX;` - device responds with `XX<value>;`
@@ -136,6 +152,17 @@ The framework uses a modular architecture with clear separation of concerns:
 - Frequency is 9 digits in Hz (e.g., `FA014074000;` = 14.074 MHz)
 - Mode values: 1=LSB, 2=USB, 3=CW-U, 4=FM, 5=AM, etc.
 - Meter values: 0-255 range for most meters
+
+## Yaesu G-5500 GS-232 Protocol Notes
+
+- Commands are single letter + optional parameters + CR terminator
+- Response format: `+0###` for azimuth/elevation values
+- Azimuth range: 0-450 degrees (allows overlap at north)
+- Elevation range: 0-180 degrees
+- Movement commands: `R` (CW), `L` (CCW), `U` (up), `D` (down)
+- Stop commands: `A` (azimuth), `E` (elevation), `S` (full stop)
+- Position commands: `C` (read az), `C2` (read az+el), `B` (read el)
+- Goto commands: `M###` (goto az), `W### ###` (goto az+el)
 
 ## Common Tasks
 
@@ -185,3 +212,4 @@ Configuration uses ~214 bytes in EEPROM:
 
 Auto-save triggers: `create`, `destroy`, `set` commands
 Manual commands: `save`, `clear`
+- Always add a copyright header to the top of source files.

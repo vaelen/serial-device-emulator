@@ -9,7 +9,11 @@ A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiv
 
 ## Supported Devices
 
-- **Yaesu FT-991A** - Full CAT protocol emulation with read/write support
+### Radio
+- **Yaesu FT-991A** (`ft-991a`) - Full CAT protocol emulation with read/write support
+
+### Rotator
+- **Yaesu G-5500** (`g-5500`) - Az/El rotator with GS-232 protocol, realistic rotation simulation
 
 ## Architecture
 
@@ -69,14 +73,16 @@ pio device monitor
 3. Create and start a device:
 
 ```
-> create yaesu 1
+> create radio 1
 Created device 0
 > start 0
 Started device 0
 ```
 
-4. The emulated radio is now listening on Serial1 (UART1)
-5. Connect your CAT control software to the device's UART1 pins
+You can use category aliases (`radio`, `rotator`, `gps`) or specific device names (`ft-991a`, `g-5500`).
+
+4. The emulated device is now listening on Serial1 (UART1)
+5. Connect your control software to the device's UART1 pins
 
 ### Console Commands
 
@@ -112,10 +118,18 @@ Type 'help' for available commands.
 
 > types
 Available device types:
-  yaesu        - Yaesu FT-991A CAT Emulator
 
-> create yaesu 1
-[INF] [DevMgr] Created device 0 (yaesu) on UART 1
+  Radio:
+    ft-991a      - Yaesu FT-991A CAT Emulator
+
+  Rotator:
+    g-5500       - Yaesu G-5500 Rotator (GS-232)
+
+  GPS:
+    (none)
+
+> create radio 1
+[INF] [DevMgr] Created device 0 (ft-991a) on UART 1
 Created device 0
 
 > options 0
@@ -131,7 +145,7 @@ Set baud_rate = 9600
 Started device 0
 
 > status 0
-Device 0 (yaesu):
+Device 0 (ft-991a):
   Description: Yaesu FT-991A CAT Emulator
   UART: 1
   Status: running
@@ -168,7 +182,7 @@ What is NOT saved:
 - Radio simulation state (frequency, mode, PTT, etc.)
 - Meter values
 
-## Yaesu CAT Protocol
+## Yaesu FT-991A CAT Protocol
 
 The emulator implements the Yaesu "New CAT" protocol used by the FT-991A and similar radios.
 
@@ -201,6 +215,49 @@ The emulator implements the Yaesu "New CAT" protocol used by the FT-991A and sim
 | SQ | Squelch | `SQ0;` / `SQ0###;` (0-100) |
 | RM | Read meter | `RM#;` (1=S, 2=Power, 3=SWR, 4=ALC, 5=Comp) |
 
+## Yaesu G-5500 GS-232 Protocol
+
+The rotator emulator implements the GS-232A/B protocol used by Yaesu rotator controllers.
+
+### Protocol Format
+
+- Commands: Single letter + optional parameters + CR terminator
+- Case insensitive
+- Supported baud rates: 1200, 4800, 9600
+
+### Rotation Simulation
+
+The emulator simulates realistic rotation:
+- Configurable azimuth speed (1-10 deg/sec, default 2)
+- Configurable elevation speed (1-10 deg/sec, default 1)
+- Azimuth range: 0-450 degrees (allows north overlap)
+- Elevation range: 0-180 degrees
+
+### Implemented Commands
+
+| Command | Description | Response |
+|---------|-------------|----------|
+| R | Rotate CW (azimuth increase) | - |
+| L | Rotate CCW (azimuth decrease) | - |
+| A | Stop azimuth rotation | - |
+| U | Rotate up (elevation increase) | - |
+| D | Rotate down (elevation decrease) | - |
+| E | Stop elevation rotation | - |
+| S | Full stop (all rotation) | - |
+| C | Read azimuth | `+0###` |
+| C2 | Read azimuth and elevation | `+0### +0###` |
+| B | Read elevation | `+0###` |
+| M### | Move to azimuth | - |
+| W### ### | Move to azimuth and elevation | - |
+
+### G-5500 Device Options
+
+| Option | Values | Default | Description |
+|--------|--------|---------|-------------|
+| baud_rate | 1200, 4800, 9600 | 9600 | Serial baud rate |
+| az_speed | 1-10 | 2 | Azimuth rotation speed (deg/sec) |
+| el_speed | 1-10 | 1 | Elevation rotation speed (deg/sec) |
+
 ## Hardware Connections
 
 ### STM32 Nucleo L432KC
@@ -223,16 +280,16 @@ The emulator implements the Yaesu "New CAT" protocol used by the FT-991A and sim
 
 ## Adding New Device Types
 
-To add support for a new radio:
+To add support for a new device:
 
 1. Create a new directory under `src/devices/`
 2. Implement the device state structure
 3. Implement the protocol parser
 4. Create a class implementing `IEmulatedDevice`
-5. Create a factory class implementing `IDeviceFactory`
+5. Create a factory class implementing `IDeviceFactory` (with `getCategory()`)
 6. Register the factory in `main.cpp`
 
-See `src/devices/yaesu/` for a complete example.
+See `src/devices/yaesu/` (radio) or `src/devices/g5500/` (rotator) for examples.
 
 ## References
 

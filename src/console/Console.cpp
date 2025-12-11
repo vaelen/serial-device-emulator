@@ -12,7 +12,7 @@ static const ConsoleCommand commands[] = {
     {"help",    "help [command]",           "Show help for commands",               cmdHelp},
     {"types",   "types",                    "List available device types",          cmdTypes},
     {"devices", "devices",                  "List active device instances",         cmdDevices},
-    {"create",  "create <type> <uart>",     "Create device on UART (e.g., create yaesu 1)", cmdCreate},
+    {"create",  "create <type> <uart>",     "Create device on UART (e.g., create radio 1)", cmdCreate},
     {"destroy", "destroy <id>",             "Destroy device by ID",                 cmdDestroy},
     {"start",   "start <id>",               "Start device",                         cmdStart},
     {"stop",    "stop <id>",                "Stop device",                          cmdStop},
@@ -210,10 +210,43 @@ void cmdTypes(Console& console, int argc, char* argv[]) {
         return;
     }
 
+    // Display devices grouped by category
+    const DeviceCategory categories[] = {
+        DeviceCategory::RADIO,
+        DeviceCategory::ROTATOR,
+        DeviceCategory::GPS
+    };
+
     console.println("Available device types:");
-    for (size_t i = 0; i < count; i++) {
-        const IDeviceFactory* factory = mgr.getFactory(i);
-        console.printf("  %-12s - %s\n", factory->getTypeName(), factory->getDescription());
+
+    for (size_t c = 0; c < 3; c++) {
+        DeviceCategory cat = categories[c];
+        bool hasDevices = false;
+
+        // Check if there are any devices in this category
+        for (size_t i = 0; i < count; i++) {
+            const IDeviceFactory* factory = mgr.getFactory(i);
+            if (factory->getCategory() == cat) {
+                hasDevices = true;
+                break;
+            }
+        }
+
+        // Print category header
+        console.printf("\n  %s:\n", categoryDisplayName(cat));
+
+        if (!hasDevices) {
+            console.println("    (none)");
+            continue;
+        }
+
+        // Print devices in this category
+        for (size_t i = 0; i < count; i++) {
+            const IDeviceFactory* factory = mgr.getFactory(i);
+            if (factory->getCategory() == cat) {
+                console.printf("    %-12s - %s\n", factory->getTypeName(), factory->getDescription());
+            }
+        }
     }
 }
 

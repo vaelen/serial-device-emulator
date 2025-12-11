@@ -5,18 +5,18 @@
 
 #include "IEmulatedDevice.h"
 #include "ISerialPort.h"
-#include "YaesuState.h"
-#include "CATParser.h"
+#include "G5500State.h"
+#include "GS232Parser.h"
 #include "platform_config.h"
 
 // Number of configurable options
-#define YAESU_OPTION_COUNT 2
+#define G5500_OPTION_COUNT 3
 
-// Yaesu FT-991A CAT interface emulator
-class YaesuDevice : public IEmulatedDevice {
+// Yaesu G-5500 Az/El rotator emulator with GS-232 protocol
+class G5500Device : public IEmulatedDevice {
 public:
-    YaesuDevice(ISerialPort* serial, uint8_t uartIndex);
-    ~YaesuDevice() override;
+    G5500Device(ISerialPort* serial, uint8_t uartIndex);
+    ~G5500Device() override;
 
     // === Lifecycle ===
     bool begin() override;
@@ -24,14 +24,14 @@ public:
     void update() override;
 
     // === Identity ===
-    const char* getName() const override { return "ft-991a"; }
-    const char* getDescription() const override { return "Yaesu FT-991A CAT Emulator"; }
+    const char* getName() const override { return "g-5500"; }
+    const char* getDescription() const override { return "Yaesu G-5500 Rotator (GS-232)"; }
     uint8_t getDeviceId() const override { return _deviceId; }
     void setDeviceId(uint8_t id) override { _deviceId = id; }
     uint8_t getUartIndex() const override { return _uartIndex; }
 
     // === Options ===
-    size_t getOptionCount() const override { return YAESU_OPTION_COUNT; }
+    size_t getOptionCount() const override { return G5500_OPTION_COUNT; }
     const DeviceOption* getOption(size_t index) const override;
     DeviceOption* findOption(const char* name) override;
     bool setOption(const char* name, const char* value) override;
@@ -41,7 +41,7 @@ public:
     size_t serializeOptions(uint8_t* buffer, size_t bufLen) const override;
     bool deserializeOptions(const uint8_t* buffer, size_t len) override;
 
-    // === Meter Simulation ===
+    // === Meter Simulation (not applicable for rotators) ===
     bool setMeter(MeterType type, uint8_t value) override;
     uint8_t getMeter(MeterType type) const override;
 
@@ -52,6 +52,12 @@ public:
     bool isRunning() const override { return _running; }
     void getStatus(char* buffer, size_t bufLen) const override;
 
+    // === Rotator-specific accessors ===
+    G5500State& getState() { return _state; }
+    const G5500State& getState() const { return _state; }
+    float getAzSpeed() const;
+    float getElSpeed() const;
+
 private:
     ISerialPort* _serial;
     uint8_t _uartIndex;
@@ -59,22 +65,23 @@ private:
     bool _running;
     ILogger* _logger;
 
-    YaesuState _state;
-    CATParser _parser;
+    G5500State _state;
+    GS232Parser _parser;
 
     // Options
-    DeviceOption _options[YAESU_OPTION_COUNT];
+    DeviceOption _options[G5500_OPTION_COUNT];
 
     void initOptions();
     void applyBaudRate();
+    void simulateRotation();
 };
 
-// Factory for creating YaesuDevice instances
-class YaesuDeviceFactory : public IDeviceFactory {
+// Factory for creating G5500Device instances
+class G5500DeviceFactory : public IDeviceFactory {
 public:
-    const char* getTypeName() const override { return "ft-991a"; }
-    const char* getDescription() const override { return "Yaesu FT-991A CAT Emulator"; }
-    DeviceCategory getCategory() const override { return DeviceCategory::RADIO; }
+    const char* getTypeName() const override { return "g-5500"; }
+    const char* getDescription() const override { return "Yaesu G-5500 Rotator (GS-232)"; }
+    DeviceCategory getCategory() const override { return DeviceCategory::ROTATOR; }
     IEmulatedDevice* create(ISerialPort* serial, uint8_t uartIndex) override;
     void destroy(IEmulatedDevice* device) override;
 };

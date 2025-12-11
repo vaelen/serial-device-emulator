@@ -29,6 +29,13 @@ public:
     // Find factory by type name
     IDeviceFactory* findFactory(const char* typeName);
 
+    // === Type Resolution ===
+
+    // Resolve type name, handling category aliases
+    // e.g., "radio" -> "ft-991a", "rotator" -> "g-5500"
+    // Returns the input unchanged if not a category alias
+    const char* resolveTypeName(const char* typeOrCategory);
+
     // === Device Lifecycle ===
 
     // Create a new device of the specified type on the given UART

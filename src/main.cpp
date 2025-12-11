@@ -9,6 +9,7 @@
 #include "core/ConsoleLogger.h"
 #include "console/Console.h"
 #include "devices/yaesu/YaesuDevice.h"
+#include "devices/g5500/G5500Device.h"
 
 // Global instances
 static DeviceManager deviceManager;
@@ -17,6 +18,7 @@ static Console* console = nullptr;
 
 // Device factories
 static YaesuDeviceFactory yaesuFactory;
+static G5500DeviceFactory g5500Factory;
 
 void setup() {
     // Initialize console serial port
@@ -35,6 +37,7 @@ void setup() {
 
     // Register device factories
     deviceManager.registerFactory(&yaesuFactory);
+    deviceManager.registerFactory(&g5500Factory);
 
     // Initialize configuration storage
     ConfigStorage::begin();

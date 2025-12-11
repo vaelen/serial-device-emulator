@@ -68,3 +68,9 @@
 
 // EEPROM configuration
 #define EEPROM_SIZE 512  // Bytes to allocate for EEPROM storage
+
+// Default device type aliases for each category
+// Used when user specifies category name (e.g., "create radio 1")
+#define DEFAULT_RADIO_TYPE "ft-991a"
+#define DEFAULT_ROTATOR_TYPE "g-5500"
+#define DEFAULT_GPS_TYPE ""  // No default GPS device yet
