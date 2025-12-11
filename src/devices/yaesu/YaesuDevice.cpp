@@ -203,12 +203,12 @@ void YaesuDevice::getStatus(char* buffer, size_t bufLen) const {
     if (modeIdx > 14) modeIdx = 0;
 
     snprintf(buffer, bufLen,
-             "  VFO-A: %lu Hz (%s)\n"
-             "  VFO-B: %lu Hz\n"
-             "  Active VFO: %c\n"
-             "  PTT: %s\n"
-             "  S-Meter: %d\n"
-             "  RIT: %s (%+d Hz)\n"
+             "  VFO-A: %lu Hz (%s)\r\n"
+             "  VFO-B: %lu Hz\r\n"
+             "  Active VFO: %c\r\n"
+             "  PTT: %s\r\n"
+             "  S-Meter: %d\r\n"
+             "  RIT: %s (%+d Hz)\r\n"
              "  XIT: %s (%+d Hz)",
              (unsigned long)_state.freqVfoA,
              modeNames[modeIdx],

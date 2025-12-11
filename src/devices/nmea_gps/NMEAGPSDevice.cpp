@@ -4,6 +4,13 @@
 #include "NMEAGPSDevice.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+// Helper to format float (printf %f not supported on all platforms)
+static char* fmtFloat(char* buf, double val, int width, int prec) {
+    dtostrf(val, width, prec, buf);
+    return buf;
+}
 
 // Baud rate options for NMEA GPS
 static const char* BAUD_RATE_OPTIONS[] = {"4800", "9600", "19200", "38400"};
@@ -219,8 +226,11 @@ void NMEAGPSDevice::setPosition(double lat, double lon, float alt) {
     _state.setPosition(lat, lon, alt);
 
     if (_logger) {
-        _logger->logf(LogLevel::INFO, "NMEA", "Position set to %.6f, %.6f, %.1fm",
-                      lat, lon, alt);
+        char latStr[16], lonStr[16], altStr[12];
+        _logger->logf(LogLevel::INFO, "NMEA", "Position set to %s, %s, %sm",
+                      fmtFloat(latStr, lat, 1, 6),
+                      fmtFloat(lonStr, lon, 1, 6),
+                      fmtFloat(altStr, alt, 1, 1));
     }
 }
 
@@ -231,22 +241,24 @@ void NMEAGPSDevice::getStatus(char* buffer, size_t bufLen) const {
 
     uint32_t rate = UPDATE_RATE_VALUES[_options[1].value.enumVal.current];
 
+    char latStr[16], lonStr[16], altStr[12], speedStr[12], courseStr[12], hdopStr[8];
     snprintf(buffer, bufLen,
-             "  Position: %.6f, %.6f\n"
-             "  Altitude: %.1f m\n"
-             "  Speed: %.1f knots\n"
-             "  Course: %.1f deg\n"
-             "  Fix: %s (%d satellites)\n"
-             "  HDOP: %.1f\n"
-             "  Time: %02d:%02d:%02d UTC\n"
-             "  Date: %04d-%02d-%02d\n"
+             "  Position: %s, %s\r\n"
+             "  Altitude: %s m\r\n"
+             "  Speed: %s knots\r\n"
+             "  Course: %s deg\r\n"
+             "  Fix: %s (%d satellites)\r\n"
+             "  HDOP: %s\r\n"
+             "  Time: %02d:%02d:%02d UTC\r\n"
+             "  Date: %04d-%02d-%02d\r\n"
              "  Update rate: %lu Hz",
-             _state.latitude, _state.longitude,
-             _state.altitude,
-             _state.speedKnots,
-             _state.courseTrue,
+             fmtFloat(latStr, _state.latitude, 1, 6),
+             fmtFloat(lonStr, _state.longitude, 1, 6),
+             fmtFloat(altStr, _state.altitude, 1, 1),
+             fmtFloat(speedStr, _state.speedKnots, 1, 1),
+             fmtFloat(courseStr, _state.courseTrue, 1, 1),
              fixStatus, _state.numSatellites,
-             _state.hdop,
+             fmtFloat(hdopStr, _state.hdop, 1, 1),
              _state.hour, _state.minute, _state.second,
              _state.year, _state.month, _state.day,
              (unsigned long)rate);

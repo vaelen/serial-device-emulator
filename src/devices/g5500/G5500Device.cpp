@@ -331,11 +331,11 @@ void G5500Device::getStatus(char* buffer, size_t bufLen) const {
     }
 
     snprintf(buffer, bufLen,
-             "  Azimuth: %d deg (%s)\n"
-             "  Elevation: %d deg (%s)\n"
-             "  Target Az: %d deg\n"
-             "  Target El: %d deg\n"
-             "  Az Speed: %lu deg/sec\n"
+             "  Azimuth: %d deg (%s)\r\n"
+             "  Elevation: %d deg (%s)\r\n"
+             "  Target Az: %d deg\r\n"
+             "  Target El: %d deg\r\n"
+             "  Az Speed: %lu deg/sec\r\n"
              "  El Speed: %lu deg/sec",
              _state.getAzimuthInt(), azStatus,
              _state.getElevationInt(), elStatus,

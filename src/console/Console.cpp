@@ -105,7 +105,7 @@ void Console::processCommand() {
 
     const ConsoleCommand* cmd = findCommand(argv[0]);
     if (cmd == nullptr) {
-        printf("Unknown command: %s\n", argv[0]);
+        printf("Unknown command: %s\r\n", argv[0]);
         println("Type 'help' for available commands.");
         return;
     }
@@ -159,8 +159,8 @@ void Console::showWelcome() {
     println();
     println("=================================");
     println("  Radio Emulator Console");
-    printf("  Platform: %s\n", PLATFORM_NAME);
-    printf("  Available UARTs: %d\n", PLATFORM_MAX_UARTS);
+    printf("  Platform: %s\r\n", PLATFORM_NAME);
+    printf("  Available UARTs: %d\r\n", PLATFORM_MAX_UARTS);
     print("  UARTs: ");
     for (uint8_t i = 1; i <= PLATFORM_MAX_UARTS; i++) {
         const char* pins = getUartPins(i);
@@ -198,18 +198,18 @@ void cmdHelp(Console& console, int argc, char* argv[]) {
         // Help for specific command
         for (const ConsoleCommand* cmd = commands; cmd->name != nullptr; cmd++) {
             if (strcasecmp(cmd->name, argv[1]) == 0) {
-                console.printf("Usage: %s\n", cmd->usage);
-                console.printf("  %s\n", cmd->help);
+                console.printf("Usage: %s\r\n", cmd->usage);
+                console.printf("  %s\r\n", cmd->help);
                 return;
             }
         }
-        console.printf("Unknown command: %s\n", argv[1]);
+        console.printf("Unknown command: %s\r\n", argv[1]);
         return;
     }
 
     console.println("Available commands:");
     for (const ConsoleCommand* cmd = commands; cmd->name != nullptr; cmd++) {
-        console.printf("  %-10s - %s\n", cmd->name, cmd->help);
+        console.printf("  %-10s - %s\r\n", cmd->name, cmd->help);
     }
 }
 
@@ -245,7 +245,7 @@ void cmdTypes(Console& console, int argc, char* argv[]) {
         }
 
         // Print category header
-        console.printf("\n  %s:\n", categoryDisplayName(cat));
+        console.printf("\r\n  %s:\r\n", categoryDisplayName(cat));
 
         if (!hasDevices) {
             console.println("    (none)");
@@ -256,7 +256,7 @@ void cmdTypes(Console& console, int argc, char* argv[]) {
         for (size_t i = 0; i < count; i++) {
             const IDeviceFactory* factory = mgr.getFactory(i);
             if (factory->getCategory() == cat) {
-                console.printf("    %-12s - %s\n", factory->getTypeName(), factory->getDescription());
+                console.printf("    %-12s - %s\r\n", factory->getTypeName(), factory->getDescription());
             }
         }
     }
@@ -281,7 +281,7 @@ void cmdDevices(Console& console, int argc, char* argv[]) {
         IEmulatedDevice* dev = mgr.getDevice(i);
         if (dev != nullptr) {
             const char* pins = getUartPins(dev->getUartIndex());
-            console.printf("  %2d  %-10s  %4d  %-16s  %s\n",
+            console.printf("  %2d  %-10s  %4d  %-16s  %s\r\n",
                           dev->getDeviceId(),
                           dev->getName(),
                           dev->getUartIndex(),
@@ -301,17 +301,24 @@ void cmdCreate(Console& console, int argc, char* argv[]) {
     int uart = atoi(argv[2]);
 
     if (uart < 1 || uart > PLATFORM_MAX_UARTS) {
-        console.printf("Invalid UART: %d (valid: 1-%d)\n", uart, PLATFORM_MAX_UARTS);
+        console.printf("Invalid UART: %d (valid: 1-%d)\r\n", uart, PLATFORM_MAX_UARTS);
         return;
     }
 
     uint8_t deviceId = console.getDeviceManager().createDevice(typeName, uart);
     if (deviceId == 0xFF) {
         console.println("Failed to create device.");
+        return;
+    }
+
+    console.printf("Created device %d\r\n", deviceId);
+
+    // Automatically start the device
+    IEmulatedDevice* dev = console.getDeviceManager().getDevice(deviceId);
+    if (dev != nullptr && dev->begin()) {
+        console.printf("Started device %d\r\n", deviceId);
     } else {
-        console.printf("Created device %d\n", deviceId);
-        // Auto-save configuration
-        ConfigStorage::save(console.getDeviceManager());
+        console.println("Warning: Failed to start device.");
     }
 }
 
@@ -323,11 +330,9 @@ void cmdDestroy(Console& console, int argc, char* argv[]) {
 
     int id = atoi(argv[1]);
     if (console.getDeviceManager().destroyDevice(id)) {
-        console.printf("Destroyed device %d\n", id);
-        // Auto-save configuration
-        ConfigStorage::save(console.getDeviceManager());
+        console.printf("Destroyed device %d\r\n", id);
     } else {
-        console.printf("Failed to destroy device %d\n", id);
+        console.printf("Failed to destroy device %d\r\n", id);
     }
 }
 
@@ -340,7 +345,7 @@ void cmdStart(Console& console, int argc, char* argv[]) {
     int id = atoi(argv[1]);
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
@@ -350,7 +355,7 @@ void cmdStart(Console& console, int argc, char* argv[]) {
     }
 
     if (dev->begin()) {
-        console.printf("Started device %d\n", id);
+        console.printf("Started device %d\r\n", id);
     } else {
         console.println("Failed to start device.");
     }
@@ -365,7 +370,7 @@ void cmdStop(Console& console, int argc, char* argv[]) {
     int id = atoi(argv[1]);
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
@@ -375,7 +380,7 @@ void cmdStop(Console& console, int argc, char* argv[]) {
     }
 
     dev->end();
-    console.printf("Stopped device %d\n", id);
+    console.printf("Stopped device %d\r\n", id);
 }
 
 void cmdStatus(Console& console, int argc, char* argv[]) {
@@ -390,7 +395,7 @@ void cmdStatus(Console& console, int argc, char* argv[]) {
     int id = atoi(argv[1]);
     IEmulatedDevice* dev = mgr.getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
@@ -398,10 +403,10 @@ void cmdStatus(Console& console, int argc, char* argv[]) {
     dev->getStatus(statusBuf, sizeof(statusBuf));
 
     const char* pins = getUartPins(dev->getUartIndex());
-    console.printf("Device %d (%s):\n", id, dev->getName());
-    console.printf("  Description: %s\n", dev->getDescription());
-    console.printf("  UART: %d (%s)\n", dev->getUartIndex(), pins != nullptr ? pins : "N/A");
-    console.printf("  Status: %s\n", dev->isRunning() ? "running" : "stopped");
+    console.printf("Device %d (%s):\r\n", id, dev->getName());
+    console.printf("  Description: %s\r\n", dev->getDescription());
+    console.printf("  UART: %d (%s)\r\n", dev->getUartIndex(), pins != nullptr ? pins : "N/A");
+    console.printf("  Status: %s\r\n", dev->isRunning() ? "running" : "stopped");
     console.println(statusBuf);
 }
 
@@ -414,7 +419,7 @@ void cmdOptions(Console& console, int argc, char* argv[]) {
     int id = atoi(argv[1]);
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
@@ -424,12 +429,12 @@ void cmdOptions(Console& console, int argc, char* argv[]) {
         return;
     }
 
-    console.printf("Options for device %d:\n", id);
+    console.printf("Options for device %d:\r\n", id);
     char valBuf[64];
     for (size_t i = 0; i < count; i++) {
         const DeviceOption* opt = dev->getOption(i);
         formatOptionValue(*opt, valBuf, sizeof(valBuf));
-        console.printf("  %-16s = %-12s  (%s)\n", opt->name, valBuf, opt->description);
+        console.printf("  %-16s = %-12s  (%s)\r\n", opt->name, valBuf, opt->description);
     }
 }
 
@@ -442,16 +447,14 @@ void cmdSet(Console& console, int argc, char* argv[]) {
     int id = atoi(argv[1]);
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
     if (dev->setOption(argv[2], argv[3])) {
-        console.printf("Set %s = %s\n", argv[2], argv[3]);
-        // Auto-save configuration
-        ConfigStorage::save(console.getDeviceManager());
+        console.printf("Set %s = %s\r\n", argv[2], argv[3]);
     } else {
-        console.printf("Failed to set %s\n", argv[2]);
+        console.printf("Failed to set %s\r\n", argv[2]);
     }
 }
 
@@ -464,15 +467,15 @@ void cmdGet(Console& console, int argc, char* argv[]) {
     int id = atoi(argv[1]);
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
     char valBuf[64];
     if (dev->getOptionValue(argv[2], valBuf, sizeof(valBuf))) {
-        console.printf("%s = %s\n", argv[2], valBuf);
+        console.printf("%s = %s\r\n", argv[2], valBuf);
     } else {
-        console.printf("Unknown option: %s\n", argv[2]);
+        console.printf("Unknown option: %s\r\n", argv[2]);
     }
 }
 
@@ -480,14 +483,14 @@ void cmdLog(Console& console, int argc, char* argv[]) {
     ILogger& logger = console.getLogger();
 
     if (argc < 2) {
-        console.printf("Current log level: %s\n", logLevelToString(logger.getLevel()));
+        console.printf("Current log level: %s\r\n", logLevelToString(logger.getLevel()));
         return;
     }
 
     LogLevel level;
     if (parseLogLevel(argv[1], level)) {
         logger.setLevel(level);
-        console.printf("Log level set to: %s\n", logLevelToString(level));
+        console.printf("Log level set to: %s\r\n", logLevelToString(level));
     } else {
         console.println("Invalid level. Use: debug, info, warn, error");
     }
@@ -504,12 +507,12 @@ void cmdSmeter(Console& console, int argc, char* argv[]) {
 
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
     if (dev->setMeter(MeterType::SMETER, value)) {
-        console.printf("S-meter set to %d\n", value);
+        console.printf("S-meter set to %d\r\n", value);
     } else {
         console.println("Failed to set S-meter");
     }
@@ -526,12 +529,12 @@ void cmdPower(Console& console, int argc, char* argv[]) {
 
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
     if (dev->setMeter(MeterType::POWER, value)) {
-        console.printf("Power meter set to %d\n", value);
+        console.printf("Power meter set to %d\r\n", value);
     } else {
         console.println("Failed to set power meter");
     }
@@ -548,12 +551,12 @@ void cmdSwr(Console& console, int argc, char* argv[]) {
 
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
     if (dev->setMeter(MeterType::SWR, value)) {
-        console.printf("SWR meter set to %d\n", value);
+        console.printf("SWR meter set to %d\r\n", value);
     } else {
         console.println("Failed to set SWR meter");
     }
@@ -588,13 +591,13 @@ void cmdGps(Console& console, int argc, char* argv[]) {
     int id = atoi(argv[1]);
     IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
     if (dev == nullptr) {
-        console.printf("Device %d not found\n", id);
+        console.printf("Device %d not found\r\n", id);
         return;
     }
 
     // Check if this is a GPS device
     if (strcmp(dev->getName(), "nmea-gps") != 0) {
-        console.printf("Device %d is not a GPS device\n", id);
+        console.printf("Device %d is not a GPS device\r\n", id);
         return;
     }
 
@@ -617,9 +620,16 @@ void cmdGps(Console& console, int argc, char* argv[]) {
 
     NMEAGPSDevice* gps = static_cast<NMEAGPSDevice*>(dev);
     gps->setPosition(lat, lon, alt);
-    console.printf("GPS position set to %.6f, %.6f", lat, lon);
+
+    // Format floats manually (printf %f not supported on all platforms)
+    char latStr[16], lonStr[16];
+    dtostrf(lat, 1, 6, latStr);
+    dtostrf(lon, 1, 6, lonStr);
+    console.printf("GPS position set to %s, %s", latStr, lonStr);
     if (argc > 4) {
-        console.printf(", %.1fm", alt);
+        char altStr[16];
+        dtostrf(alt, 1, 1, altStr);
+        console.printf(", %sm", altStr);
     }
     console.println();
 }
@@ -628,7 +638,7 @@ void cmdUarts(Console& console, int argc, char* argv[]) {
     (void)argc;
     (void)argv;
 
-    console.printf("Available UARTs on %s:\n", PLATFORM_NAME);
+    console.printf("Available UARTs on %s:\r\n", PLATFORM_NAME);
     console.println("  UART  Pins              Status");
     console.println("  ----  ----------------  ----------");
 
@@ -652,6 +662,6 @@ void cmdUarts(Console& console, int argc, char* argv[]) {
             }
         }
 
-        console.printf("  %4d  %-16s  %s\n", i, pins, status);
+        console.printf("  %4d  %-16s  %s\r\n", i, pins, status);
     }
 }

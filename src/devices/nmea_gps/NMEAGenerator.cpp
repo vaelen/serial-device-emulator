@@ -4,7 +4,14 @@
 #include "NMEAGenerator.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+
+// Helper to format float (printf %f not supported on all platforms)
+static char* fmtFloat(char* buf, double val, int width, int prec) {
+    dtostrf(val, width, prec, buf);
+    return buf;
+}
 
 NMEAGenerator::NMEAGenerator(NMEAGPSState& state, ISerialPort& serial)
     : _state(state)
@@ -63,7 +70,12 @@ void NMEAGenerator::formatLatitude(char* buf, double lat) {
     int degrees = (int)absLat;
     double minutes = (absLat - degrees) * 60.0;
 
-    snprintf(buf, 10, "%02d%07.4f", degrees, minutes);
+    // Format minutes with leading zero if needed (07.4 format = 7 chars, 4 decimals)
+    char minBuf[12];
+    dtostrf(minutes, 7, 4, minBuf);
+    // Replace leading spaces with zeros for NMEA format
+    for (int i = 0; minBuf[i] == ' '; i++) minBuf[i] = '0';
+    snprintf(buf, 12, "%02d%s", degrees, minBuf);
 }
 
 void NMEAGenerator::formatLongitude(char* buf, double lon) {
@@ -72,7 +84,12 @@ void NMEAGenerator::formatLongitude(char* buf, double lon) {
     int degrees = (int)absLon;
     double minutes = (absLon - degrees) * 60.0;
 
-    snprintf(buf, 11, "%03d%07.4f", degrees, minutes);
+    // Format minutes with leading zero if needed (07.4 format = 7 chars, 4 decimals)
+    char minBuf[12];
+    dtostrf(minutes, 7, 4, minBuf);
+    // Replace leading spaces with zeros for NMEA format
+    for (int i = 0; minBuf[i] == ' '; i++) minBuf[i] = '0';
+    snprintf(buf, 12, "%03d%s", degrees, minBuf);
 }
 
 void NMEAGenerator::formatTime(char* buf) {
@@ -91,21 +108,22 @@ void NMEAGenerator::outputGGA() {
     char time[12];
     char lat[12];
     char lon[12];
+    char hdopStr[8], altStr[12], geoidStr[12];
 
     formatTime(time);
     formatLatitude(lat, _state.latitude);
     formatLongitude(lon, _state.longitude);
 
     snprintf(_buffer, sizeof(_buffer),
-             "$GPGGA,%s,%s,%c,%s,%c,%d,%02d,%.1f,%.1f,M,%.1f,M,,",
+             "$GPGGA,%s,%s,%c,%s,%c,%d,%02d,%s,%s,M,%s,M,,",
              time,
              lat, _state.getLatHemisphere(),
              lon, _state.getLonHemisphere(),
              _state.fixQuality,
              _state.numSatellites,
-             _state.hdop,
-             _state.altitude,
-             _state.geoidSep);
+             fmtFloat(hdopStr, _state.hdop, 1, 1),
+             fmtFloat(altStr, _state.altitude, 1, 1),
+             fmtFloat(geoidStr, _state.geoidSep, 1, 1));
 
     sendSentence(_buffer);
 }
@@ -117,6 +135,7 @@ void NMEAGenerator::outputRMC() {
     char date[8];
     char lat[12];
     char lon[12];
+    char speedStr[12], courseStr[12], magVarStr[12];
 
     formatTime(time);
     formatDate(date);
@@ -127,15 +146,15 @@ void NMEAGenerator::outputRMC() {
     char magDir = _state.magVariation >= 0 ? 'E' : 'W';
 
     snprintf(_buffer, sizeof(_buffer),
-             "$GPRMC,%s,%c,%s,%c,%s,%c,%.1f,%.1f,%s,%.1f,%c,A",
+             "$GPRMC,%s,%c,%s,%c,%s,%c,%s,%s,%s,%s,%c,A",
              time,
              status,
              lat, _state.getLatHemisphere(),
              lon, _state.getLonHemisphere(),
-             _state.speedKnots,
-             _state.courseTrue,
+             fmtFloat(speedStr, _state.speedKnots, 1, 1),
+             fmtFloat(courseStr, _state.courseTrue, 1, 1),
              date,
-             fabs(_state.magVariation), magDir);
+             fmtFloat(magVarStr, fabs(_state.magVariation), 1, 1), magDir);
 
     sendSentence(_buffer);
 }
@@ -156,8 +175,11 @@ void NMEAGenerator::outputGSA() {
     }
 
     // Add DOP values
-    snprintf(_buffer + pos, sizeof(_buffer) - pos, ",%.1f,%.1f,%.1f",
-             _state.pdop, _state.hdop, _state.vdop);
+    char pdopStr[8], hdopStr[8], vdopStr[8];
+    snprintf(_buffer + pos, sizeof(_buffer) - pos, ",%s,%s,%s",
+             fmtFloat(pdopStr, _state.pdop, 1, 1),
+             fmtFloat(hdopStr, _state.hdop, 1, 1),
+             fmtFloat(vdopStr, _state.vdop, 1, 1));
 
     sendSentence(_buffer);
 }
@@ -201,12 +223,13 @@ void NMEAGenerator::outputVTG() {
     // Convert knots to km/h
     float speedKmh = _state.speedKnots * 1.852f;
 
+    char courseTStr[12], courseMStr[12], speedKnStr[12], speedKmStr[12];
     snprintf(_buffer, sizeof(_buffer),
-             "$GPVTG,%.1f,T,%.1f,M,%.1f,N,%.1f,K,A",
-             _state.courseTrue,
-             _state.courseMag,
-             _state.speedKnots,
-             speedKmh);
+             "$GPVTG,%s,T,%s,M,%s,N,%s,K,A",
+             fmtFloat(courseTStr, _state.courseTrue, 1, 1),
+             fmtFloat(courseMStr, _state.courseMag, 1, 1),
+             fmtFloat(speedKnStr, _state.speedKnots, 1, 1),
+             fmtFloat(speedKmStr, speedKmh, 1, 1));
 
     sendSentence(_buffer);
 }
