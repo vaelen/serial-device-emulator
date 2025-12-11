@@ -4,14 +4,14 @@ A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiv
 
 ## Supported Platforms
 
-| Platform | Environment | Device UARTs | Notes |
-|----------|-------------|--------------|-------|
-| Raspberry Pi Pico | `pico` | 2 | (Default) Uses earlephilhower core |
-| STM32 Nucleo L432KC | `nucleo-32-l432kc` | 1 | Default build target |
-| STM32 Nucleo G070RB | `nucleo-64-g070rb` | 3 | Serial2 reserved for console |
-| STM32 Nucleo F091RC | `nucleo-64-f091rc` | 5 | Serial2 reserved for console |
-| Arduino Mega 2560 | `arduino-mega2560` | 3 | |
-| ESP32 | `esp32dev` | 2 | |
+| Platform            | Environment          | Device UARTs | Notes                             |
+|---------------------|----------------------|--------------|-----------------------------------|
+| Raspberry Pi Pico   | `pico`               | 2            | (Default) Uses earlephilhower core |
+| STM32 Nucleo L432KC | `nucleo-32-l432kc`   | 1            |                                   |
+| STM32 Nucleo G070RB | `nucleo-64-g070rb`   | 3            | Serial2 reserved for console      |
+| STM32 Nucleo F091RC | `nucleo-64-f091rc`   | 5            | Serial2 reserved for console      |
+| Arduino Mega 2560   | `arduino-mega2560`   | 3            |                                   |
+| ESP32               | `esp32dev`           | 2            |                                   |
 
 ## Supported Devices
 
@@ -99,27 +99,27 @@ You can use category aliases (`radio`, `rotator`, `gps`) or specific device name
 
 ### Console Commands
 
-| Command | Description |
-|---------|-------------|
-| `help [cmd]` | Show help for all or specific command |
-| `types` | List available device types |
-| `uarts` | List available UARTs with pin assignments |
-| `devices` | List active device instances |
-| `create <type> <uart>` | Create device on specified UART |
-| `destroy <id>` | Destroy device by ID |
-| `start <id>` | Start a device |
-| `stop <id>` | Stop a device |
-| `status [id]` | Show device status |
-| `options <id>` | List device configuration options |
-| `set <id> <opt> <val>` | Set device option |
-| `get <id> <opt>` | Get device option value |
-| `log <level>` | Set log level (debug/info/warn/error) |
-| `smeter <id> <val>` | Set S-meter value (0-255) |
-| `power <id> <val>` | Set power meter value |
-| `swr <id> <val>` | Set SWR meter value |
-| `gps <id> <lat> <lon> [alt]` | Set GPS position (decimal degrees) |
-| `save` | Save configuration to EEPROM |
-| `clear` | Clear stored configuration |
+| Command                     | Description                          |
+|-----------------------------|--------------------------------------|
+| `help [cmd]`                | Show help for all or specific command |
+| `types`                     | List available device types          |
+| `uarts`                     | List available UARTs with pin assignments |
+| `devices`                   | List active device instances         |
+| `create <type> <uart>`      | Create device on specified UART      |
+| `destroy <id>`              | Destroy device by ID                 |
+| `start <id>`                | Start a device                       |
+| `stop <id>`                 | Stop a device                        |
+| `status [id]`               | Show device status                   |
+| `options <id>`              | List device configuration options    |
+| `set <id> <opt> <val>`      | Set device option                    |
+| `get <id> <opt>`            | Get device option value              |
+| `log <level>`               | Set log level (debug/info/warn/error) |
+| `smeter <id> <val>`         | Set S-meter value (0-255)            |
+| `power <id> <val>`          | Set power meter value                |
+| `swr <id> <val>`            | Set SWR meter value                  |
+| `gps <id> <lat> <lon> [alt]` | Set GPS position (decimal degrees)   |
+| `save`                      | Save configuration to EEPROM         |
+| `clear`                     | Clear stored configuration           |
 
 ### Example Session
 
@@ -210,26 +210,26 @@ The emulator implements the Yaesu "New CAT" protocol used by the FT-991A and sim
 
 ### Implemented Commands
 
-| Command | Description | Format |
-|---------|-------------|--------|
-| FA | VFO-A frequency | `FA;` (read) / `FA#########;` (set, 9 digits Hz) |
-| FB | VFO-B frequency | `FB;` (read) / `FB#########;` (set) |
-| IF | Information | `IF;` (read only, returns status string) |
-| ID | Radio ID | `ID;` → `ID0670;` (FT-991A) |
-| MD | Mode | `MD0;` (read) / `MD0#;` (set, 1=LSB, 2=USB, etc.) |
-| PS | Power status | `PS;` / `PS#;` (0=off, 1=on) |
-| SM | S-Meter | `SM0;` → `SM0###;` (0-255) |
-| TX | PTT | `TX;` (read) / `TX#;` (0=RX, 1=TX) |
-| RX | Receive | `RX;` (sets PTT off) |
-| VS | VFO Select | `VS;` / `VS#;` (0=A, 1=B) |
-| RI | RIT on/off | `RI;` / `RI#;` |
-| XT | XIT on/off | `XT;` / `XT#;` |
-| RD | RIT down | `RD;` / `RD####;` |
-| RU | RIT up | `RU;` / `RU####;` |
-| AG | AF gain | `AG0;` / `AG0###;` (0-255) |
-| RG | RF gain | `RG0;` / `RG0###;` (0-255) |
-| SQ | Squelch | `SQ0;` / `SQ0###;` (0-100) |
-| RM | Read meter | `RM#;` (1=S, 2=Power, 3=SWR, 4=ALC, 5=Comp) |
+| Command | Description      | Format                                           |
+|---------|------------------|--------------------------------------------------|
+| FA      | VFO-A frequency  | `FA;` (read) / `FA#########;` (set, 9 digits Hz) |
+| FB      | VFO-B frequency  | `FB;` (read) / `FB#########;` (set)              |
+| IF      | Information      | `IF;` (read only, returns status string)         |
+| ID      | Radio ID         | `ID;` → `ID0670;` (FT-991A)                      |
+| MD      | Mode             | `MD0;` (read) / `MD0#;` (set, 1=LSB, 2=USB, etc.) |
+| PS      | Power status     | `PS;` / `PS#;` (0=off, 1=on)                     |
+| SM      | S-Meter          | `SM0;` → `SM0###;` (0-255)                       |
+| TX      | PTT              | `TX;` (read) / `TX#;` (0=RX, 1=TX)               |
+| RX      | Receive          | `RX;` (sets PTT off)                             |
+| VS      | VFO Select       | `VS;` / `VS#;` (0=A, 1=B)                        |
+| RI      | RIT on/off       | `RI;` / `RI#;`                                   |
+| XT      | XIT on/off       | `XT;` / `XT#;`                                   |
+| RD      | RIT down         | `RD;` / `RD####;`                                |
+| RU      | RIT up           | `RU;` / `RU####;`                                |
+| AG      | AF gain          | `AG0;` / `AG0###;` (0-255)                       |
+| RG      | RF gain          | `RG0;` / `RG0###;` (0-255)                       |
+| SQ      | Squelch          | `SQ0;` / `SQ0###;` (0-100)                       |
+| RM      | Read meter       | `RM#;` (1=S, 2=Power, 3=SWR, 4=ALC, 5=Comp)      |
 
 ## Yaesu G-5500 GS-232 Protocol
 
@@ -251,28 +251,28 @@ The emulator simulates realistic rotation:
 
 ### Implemented Commands
 
-| Command | Description | Response |
-|---------|-------------|----------|
-| R | Rotate CW (azimuth increase) | - |
-| L | Rotate CCW (azimuth decrease) | - |
-| A | Stop azimuth rotation | - |
-| U | Rotate up (elevation increase) | - |
-| D | Rotate down (elevation decrease) | - |
-| E | Stop elevation rotation | - |
-| S | Full stop (all rotation) | - |
-| C | Read azimuth | `+0###` |
-| C2 | Read azimuth and elevation | `+0### +0###` |
-| B | Read elevation | `+0###` |
-| M### | Move to azimuth | - |
-| W### ### | Move to azimuth and elevation | - |
+| Command   | Description                      | Response       |
+|-----------|----------------------------------|----------------|
+| R         | Rotate CW (azimuth increase)     | -              |
+| L         | Rotate CCW (azimuth decrease)    | -              |
+| A         | Stop azimuth rotation            | -              |
+| U         | Rotate up (elevation increase)   | -              |
+| D         | Rotate down (elevation decrease) | -              |
+| E         | Stop elevation rotation          | -              |
+| S         | Full stop (all rotation)         | -              |
+| C         | Read azimuth                     | `+0###`        |
+| C2        | Read azimuth and elevation       | `+0### +0###`  |
+| B         | Read elevation                   | `+0###`        |
+| M###      | Move to azimuth                  | -              |
+| W### ###  | Move to azimuth and elevation    | -              |
 
 ### G-5500 Device Options
 
-| Option | Values | Default | Description |
-|--------|--------|---------|-------------|
-| baud_rate | 1200, 4800, 9600 | 9600 | Serial baud rate |
-| az_speed | 1-10 | 2 | Azimuth rotation speed (deg/sec) |
-| el_speed | 1-10 | 1 | Elevation rotation speed (deg/sec) |
+| Option    | Values           | Default | Description                        |
+|-----------|------------------|---------|------------------------------------|
+| baud_rate | 1200, 4800, 9600 | 9600    | Serial baud rate                   |
+| az_speed  | 1-10             | 2       | Azimuth rotation speed (deg/sec)   |
+| el_speed  | 1-10             | 1       | Elevation rotation speed (deg/sec) |
 
 ## NMEA GPS Emulator
 
@@ -282,13 +282,13 @@ The GPS emulator outputs standard NMEA 0183 sentences continuously at a configur
 
 The emulator outputs the following NMEA sentences each update cycle:
 
-| Sentence | Description |
-|----------|-------------|
-| GGA | GPS Fix Data (position, altitude, satellites, HDOP) |
-| RMC | Recommended Minimum (position, speed, course, date/time) |
-| GSA | DOP and Active Satellites |
-| GSV | Satellites in View (PRN, elevation, azimuth, SNR) |
-| VTG | Velocity Made Good (course and speed) |
+| Sentence | Description                                              |
+|----------|----------------------------------------------------------|
+| GGA      | GPS Fix Data (position, altitude, satellites, HDOP)      |
+| RMC      | Recommended Minimum (position, speed, course, date/time) |
+| GSA      | DOP and Active Satellites                                |
+| GSV      | Satellites in View (PRN, elevation, azimuth, SNR)        |
+| VTG      | Velocity Made Good (course and speed)                    |
 
 ### Simulated Data
 
@@ -299,10 +299,10 @@ The emulator outputs the following NMEA sentences each update cycle:
 
 ### NMEA GPS Device Options
 
-| Option | Values | Default | Description |
-|--------|--------|---------|-------------|
-| baud_rate | 4800, 9600, 19200, 38400 | 9600 | Serial baud rate |
-| update_rate | 1, 5, 10 | 1 | Output rate in Hz |
+| Option      | Values                   | Default | Description          |
+|-------------|--------------------------|---------|----------------------|
+| baud_rate   | 4800, 9600, 19200, 38400 | 9600    | Serial baud rate     |
+| update_rate | 1, 5, 10                 | 1       | Output rate in Hz    |
 
 ### Setting GPS Position
 
@@ -320,55 +320,55 @@ GPS position set to 51.507400, -0.127800, 15.5m
 
 ### Raspberry Pi Pico
 
-| UART | TX Pin | RX Pin | Notes |
-|------|--------|--------|-------|
-| Console | USB | USB | Primary serial |
-| UART 1 | GP4 | GP5 | |
-| UART 2 | GP8 | GP9 | |
+| UART    | TX Pin | RX Pin | Notes          |
+|---------|--------|--------|----------------|
+| Console | USB    | USB    | Primary serial |
+| UART 1  | GP4    | GP5    |                |
+| UART 2  | GP8    | GP9    |                |
 
 ### STM32 Nucleo L432KC
 
-| UART | TX Pin | RX Pin | Notes |
-|------|--------|--------|-------|
-| Console | USB | USB | Primary serial |
-| UART 1 | PA9 | PA10 | |
+| UART    | TX Pin | RX Pin | Notes          |
+|---------|--------|--------|----------------|
+| Console | USB    | USB    | Primary serial |
+| UART 1  | PA9    | PA10   |                |
 
 ### STM32 Nucleo G070RB
 
-| UART | TX Pin | RX Pin | Notes |
-|------|--------|--------|-------|
+| UART    | TX Pin      | RX Pin      | Notes            |
+|---------|-------------|-------------|------------------|
 | Console | ST-Link VCP | ST-Link VCP | Serial2 reserved |
-| UART 1 | PA9 | PA10 | |
-| UART 3 | PB10 | PB11 | |
-| UART 4 | PA0 | PA1 | |
+| UART 1  | PA9         | PA10        |                  |
+| UART 3  | PB10        | PB11        |                  |
+| UART 4  | PA0         | PA1         |                  |
 
 ### STM32 Nucleo F091RC
 
-| UART | TX Pin | RX Pin | Notes |
-|------|--------|--------|-------|
+| UART    | TX Pin      | RX Pin      | Notes            |
+|---------|-------------|-------------|------------------|
 | Console | ST-Link VCP | ST-Link VCP | Serial2 reserved |
-| UART 1 | PA9 | PA10 | |
-| UART 3 | PB10 | PB11 | |
-| UART 4 | PA0 | PA1 | |
-| UART 5 | PB3 | PB4 | |
-| UART 6 | PA4 | PA5 | |
+| UART 1  | PA9         | PA10        |                  |
+| UART 3  | PB10        | PB11        |                  |
+| UART 4  | PA0         | PA1         |                  |
+| UART 5  | PB3         | PB4         |                  |
+| UART 6  | PA4         | PA5         |                  |
 
 ### Arduino Mega 2560
 
-| UART | TX Pin | RX Pin | Notes |
-|------|--------|--------|-------|
-| Console | USB | USB | Primary serial |
-| UART 1 | 18 | 19 | |
-| UART 2 | 16 | 17 | |
-| UART 3 | 14 | 15 | |
+| UART    | TX Pin | RX Pin | Notes          |
+|---------|--------|--------|----------------|
+| Console | USB    | USB    | Primary serial |
+| UART 1  | 18     | 19     |                |
+| UART 2  | 16     | 17     |                |
+| UART 3  | 14     | 15     |                |
 
 ### ESP32
 
-| UART | TX Pin | RX Pin | Notes |
-|------|--------|--------|-------|
-| Console | USB | USB | Primary serial |
-| UART 1 | GPIO17 | GPIO16 | |
-| UART 2 | GPIO10 | GPIO9 | |
+| UART    | TX Pin | RX Pin | Notes          |
+|---------|--------|--------|----------------|
+| Console | USB    | USB    | Primary serial |
+| UART 1  | GPIO17 | GPIO16 |                |
+| UART 2  | GPIO10 | GPIO9  |                |
 
 ## Adding New Device Types
 
