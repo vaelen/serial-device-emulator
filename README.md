@@ -1,6 +1,6 @@
-# Radio Emulator
+# Serial Device Emulator
 
-A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiver) interfaces. The emulator supports multiple concurrent emulated devices, each controlling its own UART, with an interactive command-line console on the primary Serial port.
+A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiver), antenna rotator controllers, GPS receivers, and other serial interfaces. The emulator supports multiple concurrent emulated devices, each controlling its own UART, with an interactive command-line console on the primary Serial port.
 
 ## Supported Platforms
 
