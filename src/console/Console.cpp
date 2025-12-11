@@ -29,6 +29,7 @@ static const ConsoleCommand commands[] = {
     {"save",    "save",                     "Save configuration to EEPROM",         cmdSave},
     {"clear",   "clear",                    "Clear stored configuration",           cmdClear},
     {"gps",     "gps <id> <lat> <lon> [alt]", "Set GPS position (decimal degrees)",  cmdGps},
+    {"time",    "time <id> <HH:MM:SS> [YYYY-MM-DD]", "Set GPS time (UTC)",         cmdTime},
     {nullptr, nullptr, nullptr, nullptr}
 };
 
@@ -632,6 +633,79 @@ void cmdGps(Console& console, int argc, char* argv[]) {
         console.printf(", %sm", altStr);
     }
     console.println();
+}
+
+void cmdTime(Console& console, int argc, char* argv[]) {
+    if (argc < 3) {
+        console.println("Usage: time <id> <HH:MM:SS> [YYYY-MM-DD]");
+        console.println("  Example: time 0 14:30:00 2025-06-15");
+        return;
+    }
+
+    int id = atoi(argv[1]);
+    IEmulatedDevice* dev = console.getDeviceManager().getDevice(id);
+    if (dev == nullptr) {
+        console.printf("Device %d not found\r\n", id);
+        return;
+    }
+
+    // Check if this is a GPS device
+    if (strcmp(dev->getName(), "nmea-gps") != 0) {
+        console.printf("Device %d is not a GPS device\r\n", id);
+        return;
+    }
+
+    // Parse time string (HH:MM:SS)
+    int hour = 0, minute = 0, second = 0;
+    if (sscanf(argv[2], "%d:%d:%d", &hour, &minute, &second) != 3) {
+        console.println("Invalid time format (use HH:MM:SS)");
+        return;
+    }
+
+    // Validate time ranges
+    if (hour < 0 || hour > 23) {
+        console.println("Invalid hour (must be 0-23)");
+        return;
+    }
+    if (minute < 0 || minute > 59) {
+        console.println("Invalid minute (must be 0-59)");
+        return;
+    }
+    if (second < 0 || second > 59) {
+        console.println("Invalid second (must be 0-59)");
+        return;
+    }
+
+    // Parse optional date string (YYYY-MM-DD)
+    int year = 0, month = 0, day = 0;
+    if (argc > 3) {
+        if (sscanf(argv[3], "%d-%d-%d", &year, &month, &day) != 3) {
+            console.println("Invalid date format (use YYYY-MM-DD)");
+            return;
+        }
+        // Validate date ranges
+        if (year < 1970 || year > 2099) {
+            console.println("Invalid year (must be 1970-2099)");
+            return;
+        }
+        if (month < 1 || month > 12) {
+            console.println("Invalid month (must be 1-12)");
+            return;
+        }
+        if (day < 1 || day > 31) {
+            console.println("Invalid day (must be 1-31)");
+            return;
+        }
+    }
+
+    NMEAGPSDevice* gps = static_cast<NMEAGPSDevice*>(dev);
+    gps->setTime(hour, minute, second, day, month, year);
+
+    console.printf("GPS time set to %02d:%02d:%02d", hour, minute, second);
+    if (argc > 3) {
+        console.printf(" %04d-%02d-%02d", year, month, day);
+    }
+    console.println(" UTC");
 }
 
 void cmdUarts(Console& console, int argc, char* argv[]) {

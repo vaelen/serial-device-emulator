@@ -165,6 +165,17 @@ struct NMEAGPSState {
         altitude = alt;
     }
 
+    // Set simulated UTC time and optionally date
+    void setTime(uint8_t h, uint8_t m, uint8_t s,
+                 uint8_t d = 0, uint8_t mo = 0, uint16_t y = 0) {
+        hour = h;
+        minute = m;
+        second = s;
+        if (d > 0) day = d;
+        if (mo > 0) month = mo;
+        if (y > 0) year = y;
+    }
+
     // Check if we have a valid fix
     bool hasValidFix() const {
         return fixQuality > 0;

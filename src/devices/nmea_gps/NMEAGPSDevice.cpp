@@ -234,6 +234,21 @@ void NMEAGPSDevice::setPosition(double lat, double lon, float alt) {
     }
 }
 
+void NMEAGPSDevice::setTime(uint8_t hour, uint8_t minute, uint8_t second,
+                            uint8_t day, uint8_t month, uint16_t year) {
+    _state.setTime(hour, minute, second, day, month, year);
+
+    if (_logger) {
+        if (day > 0 && month > 0 && year > 0) {
+            _logger->logf(LogLevel::INFO, "NMEA", "Time set to %02d:%02d:%02d %04d-%02d-%02d",
+                          hour, minute, second, year, month, day);
+        } else {
+            _logger->logf(LogLevel::INFO, "NMEA", "Time set to %02d:%02d:%02d",
+                          hour, minute, second);
+        }
+    }
+}
+
 void NMEAGPSDevice::getStatus(char* buffer, size_t bufLen) const {
     const char* fixStatus = "No fix";
     if (_state.fixQuality == 1) fixStatus = "GPS fix";

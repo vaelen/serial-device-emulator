@@ -55,6 +55,8 @@ public:
 
     // GPS-specific methods
     void setPosition(double lat, double lon, float alt = 0.0f);
+    void setTime(uint8_t hour, uint8_t minute, uint8_t second,
+                 uint8_t day = 0, uint8_t month = 0, uint16_t year = 0);
     NMEAGPSState& getState() { return _state; }
 
 private:

@@ -4,8 +4,14 @@ A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiv
 
 ## Supported Platforms
 
-- **STM32 Nucleo L432KC** - 1 emulated device UART available
-- **Raspberry Pi Pico** - 1 emulated device UART available
+| Platform | Environment | Device UARTs | Notes |
+|----------|-------------|--------------|-------|
+| STM32 Nucleo L432KC | `nucleo-32-l432kc` | 1 | Default build target |
+| STM32 Nucleo G070RB | `nucleo-64-g070rb` | 3 | Serial2 reserved for console |
+| STM32 Nucleo F091RC | `nucleo-64-f091rc` | 5 | Serial2 reserved for console |
+| Raspberry Pi Pico | `pico` | 2 | Uses earlephilhower core |
+| Arduino Mega 2560 | `arduino-mega2560` | 3 | |
+| ESP32 | `esp32dev` | 2 | |
 
 ## Supported Devices
 
@@ -59,8 +65,12 @@ The framework is designed around several key interfaces:
 pio run
 
 # Build for specific target
-pio run -e nucleo
-pio run -e pico
+pio run -e nucleo-32-l432kc    # STM32 Nucleo L432KC (default)
+pio run -e nucleo-64-g070rb    # STM32 Nucleo G070RB
+pio run -e nucleo-64-f091rc    # STM32 Nucleo F091RC
+pio run -e pico                # Raspberry Pi Pico
+pio run -e arduino-mega2560    # Arduino Mega 2560
+pio run -e esp32dev            # ESP32
 
 # Upload to connected device
 pio run -t upload
@@ -310,21 +320,55 @@ GPS position set to 51.507400, -0.127800, 15.5m
 
 ### STM32 Nucleo L432KC
 
-| Function | Pin |
-|----------|-----|
-| Console TX | USB |
-| Console RX | USB |
-| Device 1 TX | PA9 |
-| Device 1 RX | PA10 |
+| UART | TX Pin | RX Pin | Notes |
+|------|--------|--------|-------|
+| Console | USB | USB | Primary serial |
+| UART 1 | PA9 | PA10 | |
+
+### STM32 Nucleo G070RB
+
+| UART | TX Pin | RX Pin | Notes |
+|------|--------|--------|-------|
+| Console | ST-Link VCP | ST-Link VCP | Serial2 reserved |
+| UART 1 | PA9 | PA10 | |
+| UART 3 | PB10 | PB11 | |
+| UART 4 | PA0 | PA1 | |
+
+### STM32 Nucleo F091RC
+
+| UART | TX Pin | RX Pin | Notes |
+|------|--------|--------|-------|
+| Console | ST-Link VCP | ST-Link VCP | Serial2 reserved |
+| UART 1 | PA9 | PA10 | |
+| UART 3 | PB10 | PB11 | |
+| UART 4 | PA0 | PA1 | |
+| UART 5 | PB3 | PB4 | |
+| UART 6 | PA4 | PA5 | |
 
 ### Raspberry Pi Pico
 
-| Function | Pin |
-|----------|-----|
-| Console TX | USB |
-| Console RX | USB |
-| Device 1 TX | GP4 |
-| Device 1 RX | GP5 |
+| UART | TX Pin | RX Pin | Notes |
+|------|--------|--------|-------|
+| Console | USB | USB | Primary serial |
+| UART 1 | GP4 | GP5 | |
+| UART 2 | GP8 | GP9 | |
+
+### Arduino Mega 2560
+
+| UART | TX Pin | RX Pin | Notes |
+|------|--------|--------|-------|
+| Console | USB | USB | Primary serial |
+| UART 1 | 18 | 19 | |
+| UART 2 | 16 | 17 | |
+| UART 3 | 14 | 15 | |
+
+### ESP32
+
+| UART | TX Pin | RX Pin | Notes |
+|------|--------|--------|-------|
+| Console | USB | USB | Primary serial |
+| UART 1 | GPIO17 | GPIO16 | |
+| UART 2 | GPIO10 | GPIO9 | |
 
 ## Adding New Device Types
 
