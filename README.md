@@ -6,10 +6,10 @@ A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiv
 
 | Platform | Environment | Device UARTs | Notes |
 |----------|-------------|--------------|-------|
+| Raspberry Pi Pico | `pico` | 2 | (Default) Uses earlephilhower core |
 | STM32 Nucleo L432KC | `nucleo-32-l432kc` | 1 | Default build target |
 | STM32 Nucleo G070RB | `nucleo-64-g070rb` | 3 | Serial2 reserved for console |
 | STM32 Nucleo F091RC | `nucleo-64-f091rc` | 5 | Serial2 reserved for console |
-| Raspberry Pi Pico | `pico` | 2 | Uses earlephilhower core |
 | Arduino Mega 2560 | `arduino-mega2560` | 3 | |
 | ESP32 | `esp32dev` | 2 | |
 
@@ -27,13 +27,13 @@ A PlatformIO/Arduino framework for emulating radio CAT (Computer Aided Transceiv
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
+┌──────────────────────────────────────────────────────────────────┐
 │                        User Console                              │
 │                    (Primary Serial/USB)                          │
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │ CommandParser → Console → DeviceManager                     │ │
 │  └─────────────────────────────────────────────────────────────┘ │
-└────────────────────────────┬────────────────────────────────────┘
+└────────────────────────────┬─────────────────────────────────────┘
                              │ Logger + Options Interface
                              ▼
                     ┌───────────────┐
@@ -318,6 +318,14 @@ GPS position set to 51.507400, -0.127800, 15.5m
 
 ## Hardware Connections
 
+### Raspberry Pi Pico
+
+| UART | TX Pin | RX Pin | Notes |
+|------|--------|--------|-------|
+| Console | USB | USB | Primary serial |
+| UART 1 | GP4 | GP5 | |
+| UART 2 | GP8 | GP9 | |
+
 ### STM32 Nucleo L432KC
 
 | UART | TX Pin | RX Pin | Notes |
@@ -344,14 +352,6 @@ GPS position set to 51.507400, -0.127800, 15.5m
 | UART 4 | PA0 | PA1 | |
 | UART 5 | PB3 | PB4 | |
 | UART 6 | PA4 | PA5 | |
-
-### Raspberry Pi Pico
-
-| UART | TX Pin | RX Pin | Notes |
-|------|--------|--------|-------|
-| Console | USB | USB | Primary serial |
-| UART 1 | GP4 | GP5 | |
-| UART 2 | GP8 | GP9 | |
 
 ### Arduino Mega 2560
 
