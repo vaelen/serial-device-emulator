@@ -14,14 +14,14 @@
     #define PLATFORM_NAME "Pico"
     #define PLATFORM_MAX_UARTS 2
 
-    // UART 0: GP0 (TX), GP1 (RX)
-    // UART 1: GP4 (TX), GP5 (RX)
+    // UART 1: GP0 (TX), GP1 (RX)
+    // UART 2: GP8 (TX), GP9 (RX)
 
     #define HAS_SERIAL1 1
     #define HAS_SERIAL2 1
 
     // UART pin mappings
-    #define UART_1_PINS "TX=GP4, RX=GP5"
+    #define UART_1_PINS "TX=GP0, RX=GP1"
     #define UART_2_PINS "TX=GP8, RX=GP9"
 
 #elif defined(ARDUINO_NUCLEO_L432KC) || defined(STM32L4xx)
